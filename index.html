@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Valnita Express | Delivery Request</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.3rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.75rem;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #555;
+    }
+
+    #result {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background-color: #e0ffe0;
+      border: 1px solid #b2ffb2;
+      border-radius: 4px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Valnita Express - Delivery Request</h1>
+
+  <form id="deliveryForm">
+    <label for="pickup">Pickup Location:</label>
+    <input type="text" id="pickup" placeholder="Enter pickup address" required>
+
+    <label for="dropoff">Drop-off Location:</label>
+    <input type="text" id="dropoff" placeholder="Enter drop-off address" required>
+
+    <button type="submit">Calculate Delivery Cost</button>
+  </form>
+
+  <div id="result"></div>
+
+  <!-- Google Maps Script -->
+<script
+  async
+  defer
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDYPEzxtL_Tpq8S6ElmiIsO0-ThN7xgFM&libraries=places&callback=initAutocomplete">
+</script>
+>
+
+  <script>
+    let pickupAutocomplete, dropoffAutocomplete;
+
+    function initAutocomplete() {
+      const pickupInput = document.getElementById('pickup');
+      const dropoffInput = document.getElementById('dropoff');
+
+      pickupAutocomplete = new google.maps.places.Autocomplete(pickupInput);
+      dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffInput);
+    }
+
+    const form = document.getElementById('deliveryForm');
+    const resultDiv = document.getElementById('result');
+    const RATE_PER_KM = 5; // R5 per km
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const pickup = document.getElementById('pickup').value;
+      const dropoff = document.getElementById('dropoff').value;
+
+      const service = new google.maps.DistanceMatrixService();
+
+      service.getDistanceMatrix(
+        {
+          origins: [pickup],
+          destinations: [dropoff],
+          travelMode: 'DRIVING',
+          unitSystem: google.maps.UnitSystem.METRIC,
+        },
+        function (response, status) {
+          if (status !== 'OK') {
+            alert('Error with Distance Matrix: ' + status);
+          } else {
+            const distanceText = response.rows[0].elements[0].distance.text;
+            const distanceValue = response.rows[0].elements[0].distance.value / 1000; // in km
+            const cost = Math.ceil(distanceValue * RATE_PER_KM);
+
+            resultDiv.innerHTML = `
+              <strong>Distance:</strong> ${distanceText}<br>
+              <strong>Estimated Cost:</strong> R${cost}
+            `;
+            resultDiv.style.display = 'block';
+          }
+        }
+      );
+    });
+  </script>
+</body>
+</html>

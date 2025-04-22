@@ -1,172 +1,129 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Portfolio</title>
+  <title>Valnita Express | Delivery Request</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 0;
-      line-height: 1.6;
-      background: #f4f4f4;
-      color: #333;
+      background: #f2f2f2;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
     }
 
-    header {
-      background: #333;
-      color: #fff;
-      padding: 1.5rem;
+    h1 {
       text-align: center;
     }
 
-    header h1 {
-      margin: 0;
-    }
-
-    nav ul {
-      padding: 0;
-      list-style: none;
-      display: flex;
-      justify-content: center;
-      gap: 1.5rem;
+    label {
+      display: block;
       margin-top: 1rem;
     }
 
-    nav a {
-      color: #fff;
-      text-decoration: none;
-    }
-
-    section {
-      padding: 2rem;
-      background: #fff;
-      margin: 1rem auto;
-      max-width: 800px;
-      border-radius: 8px;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-    }
-
-    form input,
-    form textarea {
-      margin-bottom: 1rem;
+    input {
+      width: 100%;
       padding: 0.5rem;
+      margin-top: 0.3rem;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
 
     button {
-      background: #333;
-      color: #fff;
+      margin-top: 1.5rem;
+      width: 100%;
       padding: 0.75rem;
+      background-color: #333;
+      color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
     }
 
     button:hover {
-      background: #555;
+      background-color: #555;
     }
 
-    footer {
-      background: #222;
-      color: #ddd;
-      text-align: center;
+    #result {
+      margin-top: 1.5rem;
       padding: 1rem;
-      margin-top: 2rem;
+      background-color: #e0ffe0;
+      border: 1px solid #b2ffb2;
+      border-radius: 4px;
+      display: none;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Ruth Mamabolo</h1>
-    <p>Web Developer | Designer | Tech Enthusiast</p>
-    <nav>
-      <ul>
-        <li><a href="#about">About</a></li>
-        <li><a href="#skills">Skills</a></li>
-        <li><a href="#projects">Projects</a></li>
-        <li><a href="#contact">Contact</a></li>
-      </ul>
-    </nav>
-  </header>
+  <h1>Valnita Express - Delivery Request</h1>
 
-  <main>
-    <section id="about">
-      <h2>About Me</h2>
-      <p>I’m a passionate student web developer with experience in data analytics and building responsive and user-friendly websites using modern technologies.</p>
-    </section>
+  <form id="deliveryForm">
+    <label for="pickup">Pickup Location:</label>
+    <input type="text" id="pickup" placeholder="Enter pickup address" required>
 
-    <section id="skills">
-      <h2>Skills</h2>
-      <ul>
-        <li>HTML5 & CSS3</li>
-        <li>JavaScript (ES6+)</li>
-        <li>React & Vue</li>
-        <li>Node.js</li>
-        <li>Git & GitHub</li>
-      </ul>
-    </section>
+    <label for="dropoff">Drop-off Location:</label>
+    <input type="text" id="dropoff" placeholder="Enter drop-off address" required>
 
-    <section id="projects">
-      <h2>Projects</h2>
-      <article>
-        <h3>Portfolio Website</h3>
-        <p>A clean and minimal portfolio showcasing my work.</p>
-      </article>
-      <article>
-        <h3>Task Manager App</h3>
-        <p>A to-do list web app built with JavaScript and local storage.</p>
-      </article>
-    </section>
+    <button type="submit">Calculate Delivery Cost</button>
+  </form>
 
-    <section id="contact">
-      <h2>Contact Me</h2>
-      <form id="contactForm">
-        <label for="name">Name:</label>
-        <input type="text" id="name" required />
+  <div id="result"></div>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" required />
-
-        <label for="message">Message:</label>
-        <textarea id="message" required></textarea>
-
-        <button type="submit">Send Message</button>
-        <p id="formResponse"></p>
-      </form>
-    </section>
-  </main>
-
-  <footer>
-    <p>&copy; 2025 Ruth Mamabolo. All rights reserved.</p>
-  </footer>
+  <!-- Google Maps Script (Insert your key below) -->
+  AIzaSyDDYPEzxtL_Tpq8S6ElmiIsO0-ThN7xgFM
+  <script
+    async
+    defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDYPEzxtL_Tpq8S6ElmiIsO0-ThN7xgFM&libraries=places&callback=initAutocomplete">
+  </script>
 
   <script>
-    document.getElementById('contactForm').addEventListener('submit', function(e) {
+    let pickupAutocomplete, dropoffAutocomplete;
+
+    function initAutocomplete() {
+      const pickupInput = document.getElementById('pickup');
+      const dropoffInput = document.getElementById('dropoff');
+
+      pickupAutocomplete = new google.maps.places.Autocomplete(pickupInput);
+      dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffInput);
+    }
+
+    const form = document.getElementById('deliveryForm');
+    const resultDiv = document.getElementById('result');
+    const RATE_PER_KM = 5; // R5 per km
+
+    form.addEventListener('submit', function (e) {
       e.preventDefault();
 
-      const name = document.getElementById('name');
-      const email = document.getElementById('email');
-      const message = document.getElementById('message');
-      const response = document.getElementById('formResponse');
+      const pickup = document.getElementById('pickup').value;
+      const dropoff = document.getElementById('dropoff').value;
 
-      if (!name.value || !email.value || !message.value) {
-        response.textContent = 'Please fill out all fields.';
-        response.style.color = 'red';
-        return;
-      }
+      const service = new google.maps.DistanceMatrixService();
 
-      response.textContent = 'Message sent successfully!';
-      response.style.color = 'green';
+      service.getDistanceMatrix(
+        {
+          origins: [pickup],
+          destinations: [dropoff],
+          travelMode: 'DRIVING',
+          unitSystem: google.maps.UnitSystem.METRIC,
+        },
+        function (response, status) {
+          if (status !== 'OK') {
+            alert('Error with Distance Matrix: ' + status);
+          } else {
+            const distanceText = response.rows[0].elements[0].distance.text;
+            const distanceValue = response.rows[0].elements[0].distance.value / 1000; // in km
+            const cost = Math.ceil(distanceValue * RATE_PER_KM);
 
-      name.value = '';
-      email.value = '';
-      message.value = '';
+            resultDiv.innerHTML = `
+              <strong>Distance:</strong> ${distanceText}<br>
+              <strong>Estimated Cost:</strong> R${cost}
+            `;
+            resultDiv.style.display = 'block';
+          }
+        }
+      );
     });
   </script>
 </body>
